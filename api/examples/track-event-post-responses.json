@@ -1,0 +1,13 @@
+{
+    "all_successful": true,
+    "responses": [
+        {
+            "http_status_code": 201,
+            "id": "9ebea512-3556-436c-9026-5ad3f9065f48"
+        },
+        {
+            "http_status_code": 200,
+            "id": "cecaa901-b9fd-4bd9-8c0e-c467b18b6957"
+        }
+    ]
+}

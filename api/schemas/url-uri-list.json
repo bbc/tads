@@ -1,0 +1,6 @@
+{
+    "title": "Query String percent-encoded URI list",
+    "description": "A list of percent-encoded URIs, formatted for use in query string parameters",
+    "type": "string",
+    "pattern": "^([^,]+(,[^,]+)*)?$"
+}

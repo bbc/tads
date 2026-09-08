@@ -1,0 +1,40 @@
+{
+    "title": "Track Events Responses",
+    "description": "Responses to a request to create or modify Track Events",
+    "type": "object",
+    "required": [
+        "all_successful",
+        "responses"
+    ],
+    "properties": {
+        "all_successful": {
+            "description": "A value of 'true' indicates that all Track Events included in the request were processed successfully and so all entries in `responses` have a 2xx `http_status_code` (indicating success). A value of 'false' indicates that an error occurred when processing at least one Track Event in the request.",
+            "type": "boolean"
+        },
+        "responses": {
+            "description": "Ordered list of Track Event responses. There must be one entry in `responses` for each Track Event in the request, and they must be in the same order.",
+            "type": "array",
+            "items": {
+                "description": "Track Event response details",
+                "type": "object",
+                "required": [
+                    "http_status_code"
+                ],
+                "properties": {
+                    "http_status_code": {
+                        "description": "The HTTP response status code to indicate the outcome of processing the Track Event in the request.",
+                        "type": "integer"
+                    },
+                    "id": {
+                        "description": "The Track Event identifier. `id` should be present whenever available. `id` must be present if an identifier was present for the Track Event in the request.",
+                        "$ref": "uuid.json"
+                    },
+                    "error": {
+                        "description": "Provides more information in the case of error, as described by the [Error](#/schemas/error) type",
+                        "$ref": "error.json"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "title": "Payload Schema",
+    "description": "Describes a Payload Schema that may be used to validate a Track Event's `payload`",
+    "type": "object",
+    "required": [
+        "id",
+        "schema"
+    ],
+    "properties": {
+        "id": {
+            "description": "Payload Schema identifier",
+            "$ref": "uuid.json"
+        },
+        "external_id": {
+            "description": "A string identifier used to identify the Payload Schema in other systems. If the Payload Schema is imported from another system and has a URI, or other identifier, it should be set here.",
+            "type": "string"
+        },
+        "label": {
+            "description": "Freeform string label for the Payload Schema. This should be a very short, human-readable label that may be displayed in listings of Payload Schemas.",
+            "type": "string"
+        },
+        "description": {
+            "description": "Freeform text describing the Payload Schema. This should be a human-readable description that may be displayed in detailed views of Payload Schemas. The description should be longer and more detailed than `label`.",
+            "type": "string"
+        },
+        "created_by": {
+            "description": "A string identifier for the entity that created the Payload Schema. Service Implementations SHOULD set suitable default values for `created_by` based on the principal accessing the systems.",
+            "type": "string"
+        },
+        "updated_by": {
+            "description": "A string identifier for the entity that updated the Payload Schema metadata most recently. Service Implementations SHOULD set suitable default values for `updated_by` based on the principal accessing the system.",
+            "type": "string"
+        },
+        "created": {
+            "description": "The date-time the Payload Schema was created in a given context, e.g. in the Service Instance. Service Implementations SHOULD ignore this if given in a PUT request, and instead manage it internally",
+            "type": "string",
+            "format": "date-time"
+        },
+        "updated": {
+            "description": "The date-time the Payload Schema metadata was last updated in a given context, e.g. in the Service Instance. Service Implementations SHOULD ignore this if given in a PUT request, and instead manage it internally",
+            "type": "string",
+            "format": "date-time"
+        },
+        "tags": {
+            "$ref": "tags.json",
+            "default": {}
+        },
+        "schema": {
+            "description": "The schema itself. Conforms to the JSON schema specification. Service Implementations must not permit editing of the `schema` itself.",
+            "type": "object"
+        }
+    }
+}

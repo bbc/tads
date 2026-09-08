@@ -1,0 +1,24 @@
+{
+    "id": "adb87970-b03a-4266-b5d8-f3f6541fb73a",
+    "external_id": "http://example.com/transcription-schema",
+    "label": "Example transcription schema",
+    "description": "My example transcription schema",
+    "tags": {
+        "auth_classes": [
+            "news"
+        ]
+    },
+    "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Simple transcription",
+        "description": "Simple transcription data",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "text": {
+                "description": "The transcription text",
+                "type": "string"
+            }
+        }
+    }
+}

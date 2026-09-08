@@ -1,0 +1,2505 @@
+#
+# Copyright 2026 British Broadcasting Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+openapi: 3.1.0
+info:
+  title: Time-Addressable Data Store
+  description: |
+    The Time-Addressable Data Store (TADS) is used for storing timeline data.
+    The TADS consists of a service providing a database index of the Tracks and Track Events associated with them.
+    This document is a specification of the service API.
+
+    See the [bbc/tads](https://github.com/bbc/tads) repository for more background on TADS.
+  version: "0.1"
+  contact:
+    name: 'BBC R&D - Cloud-Fit Production Team'
+    email: 'cloudfit-opensource@rd.bbc.co.uk'
+    url: https://github.com/bbc/tads
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: 'http://localhost:4010'
+    description: Local mock of API
+  - url: 'https://example.com/tads/{version}'
+    description: Example TADS service
+    variables:
+      version:
+        description: API version
+        default: v0.1
+security:
+  - bearer_token_auth: []
+  - url_token_auth: []
+  - basic_auth: []
+paths:
+  /:
+    head:
+      summary: List Root Endpoints
+      operationId: HEAD_root
+      description: Return `/` path headers
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Service
+    get:
+      summary: List Root Endpoints
+      operationId: GET_root
+      description: Return the list of endpoints available from the API.
+      responses:
+        "200":
+          description: Return the list of endpoints available from the API.
+          content:
+            application/json:
+              example:
+                - schemas
+                - service
+                - tracks
+      tags:
+        - Service
+  /service:
+    head:
+      summary: Service metadata
+      operationId: HEAD_service
+      description: Return `/service` path headers
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Service
+    get:
+      summary: Service metadata
+      operationId: GET_service
+      description: Return metadata about the Service Instance.
+      responses:
+        "200":
+          description: Return metadata about the Service Instance.
+          content:
+            application/json:
+              schema:
+                $ref: schemas/service.json
+              example:
+                $ref: examples/service-get-200.json
+      tags:
+        - Service
+  /schemas:
+    head:
+      summary: List Payload Schemas
+      operationId: HEAD_schemas
+      description: Return `/schemas` path headers
+      parameters:
+        - name: label
+          in: query
+          description: Filter on Payload Schemas that have the given `label`.
+          schema:
+            type: string
+        - name: external_id
+          in: query
+          description: |
+            Filter on Payload Schemas that have the given `external_id`.
+            The value MUST be URL encoded where special characters are present.
+          schema:
+            type: string
+        - name: tag.{name}
+          in: query
+          description: |
+            Filter on Payload Schemas that have a tag named {name} with a value in the given comma-separated list of values.
+            The {name} and the value MUST be URL encoded where special characters are present.
+            Where the tag's value is a string, at least one of the given values will match.
+            Where the tag's value is an array, at least one value in the array will match at least one of the given values.
+            Partial string matches of the values are not valid.
+          schema:
+            $ref: schemas/url-tag-list.json
+        - name: tag_exists.{name}
+          in: query
+          description: |
+            Filter on Payload Schemas that have a tag named {name} regardless of value.
+            {name} MUST be URL encoded where special characters are present.
+            If set to true then the presence of the tag is filtered for.
+            If set to false then its absence is.
+            If left out then no filtering on tag presence is performed.
+          schema:
+            type: boolean
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: ""
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+      tags:
+        - Payload Schemas
+    get:
+      summary: List Payload Schemas
+      operationId: GET_schemas
+      description: |
+        Return the list of Payload Schemas.
+
+        Each Track references a Payload Schema: the JSON `schema` belonging to the Payload Schema is used to validate the `payload` of every Track Event owned by the Track.
+      parameters:
+        - name: label
+          in: query
+          description: Filter on Payload Schemas that have the given `label`.
+          schema:
+            type: string
+        - name: external_id
+          in: query
+          description: |
+            Filter on Payload Schemas that have the given `external_id`.
+            The value MUST be URL encoded where special characters are present.
+          schema:
+            type: string
+        - name: tag.{name}
+          in: query
+          description: |
+            Filter on Payload Schemas that have a tag named {name} with a value in the given comma-separated list of values.
+            The {name} and the value MUST be URL encoded where special characters are present.
+            Where the tag's value is a string, at least one of the given values will match.
+            Where the tag's value is an array, at least one value in the array will match at least one of the given values.
+            Partial string matches of the values are not valid.
+          schema:
+            $ref: schemas/url-tag-list.json
+        - name: tag_exists.{name}
+          in: query
+          description: |
+            Filter on Payload Schemas that have a tag named {name} regardless of value.
+            {name} MUST be URL encoded where special characters are present.
+            If set to true then the presence of the tag is filtered for.
+            If set to false then its absence is.
+            If left out then no filtering on tag presence is performed.
+          schema:
+            type: boolean
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: Return the list of Payload Schemas.
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/schema.json
+              example:
+                $ref: examples/schemas-get-200.json
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+      tags:
+        - Payload Schemas
+  /schemas/{schema_id}:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: Payload Schema details
+      operationId: HEAD_schemas-schema_id
+      description: Return `/schemas/{schema_id}` path headers
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+      tags:
+        - Payload Schemas
+    get:
+      summary: Payload Schema details
+      operationId: GET_schemas-schema_id
+      description: |
+        Return the Payload Schema details.
+
+        Each Track references a Payload Schema: the JSON `schema` belonging to the Payload Schema is used to validate the `payload` of every Track Event owned by the Track.
+      responses:
+        "200":
+          description: Return the Payload Schema details.
+          content:
+            application/json:
+              schema:
+                $ref: schemas/schema.json
+              example:
+                $ref: examples/schema-get-200.json
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+      tags:
+        - Payload Schemas
+    put:
+      summary: Create Payload Schema
+      description: |
+        Create a Payload Schema or update a Payload Schema's metadata.
+
+        Each Track references a Payload Schema: the JSON `schema` belonging to the Payload Schema is used to validate the `payload` of every Track Event owned by the Track.
+      operationId: PUT_schemas-schema_id
+      tags:
+        - Payload Schemas
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/schema-put.json
+            schema:
+              $ref: schemas/schema.json
+        required: true
+      responses:
+        "201":
+          description: Created. The Payload Schema has been created.
+          content:
+            application/json:
+              example:
+                $ref: examples/schema-put.json
+              schema:
+                $ref: schemas/schema.json
+        "204":
+          description: No content. The Payload Schema's metadata has been updated.
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_request_body"
+        "403":
+          description: Forbidden. Requests cannot modify an existing Payload Schema's `schema` value.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_valid"
+    delete:
+      summary: Delete Payload Schema
+      description: |
+        Delete the Payload Schema.
+
+        Any Tracks using the Payload Schema must be deleted before deleting the Payload Schema. Service Implementations MUST reject the request if any Tracks exist that refer to the Payload Schema.
+      operationId: DELETE_schemas-schema_id
+      tags:
+        - Payload Schemas
+      responses:
+        "204":
+          description: No content. The Payload Schema has been deleted.
+        "400":
+          description: Bad request. The Payload Schema could still be in use by a Track.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_delete_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /schemas/{schema_id}/schema:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: Payload Schema's JSON schema
+      description: Return `/schemas/{schema_id}/schema` path headers
+      operationId: HEAD_schemas-schema_id-schema
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Payload Schema's JSON schema
+      description: Return the Payload Schema `schema` value.
+      operationId: GET_schemas-schema_id-schema
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: Return the Payload Schema `schema` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/schema-get-200.json#/schema
+              schema:
+                description: The schema itself. Conforms to the JSON schema specification. Service Implementations must not permit editing of the `schema` itself.
+                type: object
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /schemas/{schema_id}/tags:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: List Payload Schema Tags
+      description: Return `/schemas/{schema_id}/tags` path headers
+      operationId: HEAD_schemas-schema_id-tags
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: List Payload Schema Tags
+      description: Return the Payload Schema `tags` value.
+      operationId: GET_schemas-schema_id-tags
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: Return the Payload Schema `tags` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/schema-get-200.json#/tags
+              schema:
+                $ref: schemas/tags.json
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /schemas/{schema_id}/tags/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The tag name (used as the key in `tags`). {name} MUST be URL encoded where special characters are present.
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: Payload Schema Tag Value
+      description: Return `/schemas/{schema_id}/tags/{name}` path headers
+      operationId: HEAD_schemas-schema_id-tags-name
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Payload Schema Tag Value
+      description: Return the tag value associated with the tag name (where name is used as the key in `tags`).
+      operationId: GET_schemas-schema_id-tags-name
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: Return the tag value associated with the tag name (where name is used as the key in `tags`).
+          content:
+            application/json:
+              example: |
+                "news"
+              schema:
+                oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Payload Schema Tag
+      description: Create or update the Payload Schema tag (where name is used as the key in `tags`).
+      operationId: PUT_schemas-schema_id-tags-name
+      tags:
+        - Payload Schemas (granular)
+      requestBody:
+        content:
+          application/json:
+            example: |
+              "new_value"
+            schema:
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The tag has been created or updated.
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_request_body"
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          description: Not found. The specified Payload Schema does not exist and/or the tag name in the path is invalid.
+    delete:
+      summary: Delete Payload Schema Tag
+      description: Delete the Payload Schema tag (where name is used as the key in `tags`).
+      operationId: DELETE_schemas-schema_id-tags-name
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "204":
+          description: No content. The Payload Schema tag has been deleted.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_delete_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /schemas/{schema_id}/description:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: Payload Schema Description
+      description: Return `/schemas/{schema_id}/description` path headers
+      operationId: HEAD_schemas-schema_id-description
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Payload Schema Description
+      description: Return the Payload Schema `description` value.
+      operationId: GET_schemas-schema_id-description
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: Return the Payload Schema `description` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/schema-get-200.json#/description
+              schema:
+                description: Freeform text describing the Payload Schema. This should be a human-readable description that may be displayed in detailed views of Payload Schemas. The description should be longer and more detailed than `label`.
+                type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Payload Schema Description
+      description: Create or update Payload Schema `description` with the given value.
+      operationId: PUT_schemas-schema_id-description
+      tags:
+        - Payload Schemas (granular)
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/schema-get-200.json#/description
+            schema:
+              description: Freeform text describing the Payload Schema. This should be a human-readable description that may be displayed in detailed views of Payload Schemas. The description should be longer and more detailed than `label`.
+              type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The Payload Schema `description` has been created or updated with the given value.
+        "400":
+          description: Bad request. Invalid Payload Schema `description` value.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Payload Schema Description
+      description: Delete the Payload Schema `description` property.
+      operationId: DELETE_schemas-schema_id-description
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "204":
+          description: No content. The Payload Schema `description` property has been deleted.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /schemas/{schema_id}/label:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: Payload Schema Label
+      description: Return `/schemas/{schema_id}/label` path headers
+      operationId: HEAD_schemas-schema_id-label
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Payload Schema Label
+      description: Return the Payload Schema `label` value.
+      operationId: GET_schemas-schema_id-label
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: Return the Payload Schema `label` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/schema-get-200.json#/label
+              schema:
+                description: Freeform string label for the Payload Schema. This should be a very short, human-readable label that may be displayed in listings of Payload Schemas.
+                type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Payload Schema Label
+      description: Create or update Payload Schema `label` with the given value.
+      operationId: PUT_schemas-schema_id-label
+      tags:
+        - Payload Schemas (granular)
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/schema-get-200.json#/label
+            schema:
+              description: Freeform string label for the Payload Schema. This should be a very short, human-readable label that may be displayed in listings of Payload Schemas.
+              type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The Payload Schema `label` has been created or updated with the given value.
+        "400":
+          description: Bad request. Invalid Payload Schema `label` value.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Payload Schema Label
+      description: Delete the Payload Schema `label` property.
+      operationId: DELETE_schemas-schema_id-label
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "204":
+          description: No content. The Payload Schema `label` property has been deleted.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /schemas/{schema_id}/external_id:
+    parameters:
+      - name: schema_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Payload Schema identifier.
+    head:
+      summary: Payload Schema External ID
+      description: Return `/schemas/{schema_id}/external_id` path headers
+      operationId: HEAD_schemas-schema_id-external_id
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Payload Schema External ID
+      description: Return the Payload Schema `external_id` value.
+      operationId: GET_schemas-schema_id-external_id
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "200":
+          description: Return the Payload Schema `external_id` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/schema-get-200.json#/external_id
+              schema:
+                description: A string identifier used to identify the Payload Schema in other systems. If the Payload Schema is imported from another system and has a URI, or other identifier, it should be set here.
+                type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Payload Schema External ID
+      description: Create or update Payload Schema `external_id` with the given value.
+      operationId: PUT_schemas-schema_id-external_id
+      tags:
+        - Payload Schemas (granular)
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/schema-get-200.json#/external_id
+            schema:
+              description: A string identifier used to identify the Payload Schema in other systems. If the Payload Schema is imported from another system and has a URI, or other identifier, it should be set here.
+              type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The Payload Schema `external_id` has been created or updated with the given value.
+        "400":
+          description: Bad request. Invalid Payload Schema `external_id` value.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Payload Schema External ID
+      description: Delete the Payload Schema `external_id` property.
+      operationId: DELETE_schemas-schema_id-external_id
+      tags:
+        - Payload Schemas (granular)
+      responses:
+        "204":
+          description: No content. The Payload Schema `external_id` property has been deleted.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /service/webhooks:
+    head:
+      summary: List Webhook URLs
+      description: Return `/service/webhooks` path headers
+      operationId: HEAD_service-webhooks
+      tags:
+        - Webhooks
+      parameters:
+        - name: tag.{name}
+          in: query
+          description: |
+            Filter on webhooks that have a tag named {name} with a value in the given comma-separated list of values.
+            The {name} and the value MUST be URL encoded where special characters are present.
+            Where the tag's value is a string, at least one of the given values will match.
+            Where the tag's value is an array, at least one value in the array will match at least one of the given values.
+            Partial string matches of the values are not valid.
+          schema:
+            $ref: schemas/url-tag-list.json
+        - name: tag_exists.{name}
+          in: query
+          description: |
+            Filter on webhooks that have a tag named {name} regardless of value.
+            {name} MUST be URL encoded where special characters are present.
+            If set to true then the presence of the tag is filtered for.
+            If set to false then its absence is.
+            If left out then no filtering on tag presence is performed.
+          schema:
+            type: boolean
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: ""
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+    get:
+      summary: List Webhook URLs
+      description: |
+        Return the list of registered webhook URLs.
+
+        Service Implementations SHOULD take steps to avoid displaying URLs to users other than those who have suitable permissions (e.g. the owning user).
+      operationId: GET_service-webhooks
+      tags:
+        - Webhooks
+      parameters:
+        - name: tag.{name}
+          in: query
+          description: |
+            Filter on webhooks that have a tag named {name} with a value in the given comma-separated list of values.
+            The {name} and the value MUST be URL encoded where special characters are present.
+            Where the tag's value is a string, at least one of the given values will match.
+            Where the tag's value is an array, at least one value in the array will match at least one of the given values.
+            Partial string matches of the values are not valid.
+          schema:
+            $ref: schemas/url-tag-list.json
+        - name: tag_exists.{name}
+          in: query
+          description: |
+            Filter on webhooks that have a tag named {name} regardless of value.
+            {name} MUST be URL encoded where special characters are present.
+            If set to true then the presence of the tag is filtered for.
+            If set to false then its absence is.
+            If left out then no filtering on tag presence is performed.
+          schema:
+            type: boolean
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: Return the list of registered webhook URLs.
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+          content:
+            application/json:
+              example:
+                $ref: examples/webhook-get-200-list.json
+              schema:
+                type: array
+                items:
+                  $ref: schemas/webhook-get.json
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+    post:
+      summary: Register webhook details
+      description: |
+        Register to receive event notifications as webhooks on a specified URL.
+
+        Webhook messages will conform to the format in the `webhooks` section of the API docs, depending on the event type (as defined in the same section).
+
+        HTTP events sent by the service to a client webhook's endpoint SHOULD include a header with the header name given by `api_key_name` and the header value given by `api_key_value`.
+        Clients SHOULD verify this against the value they provided when registering the webhook.
+
+        Service Implementations MAY partially support event filtering and transformations.
+        Service Implementations SHALL return a 400 response code if the filtering or transformation specified in the request is not supported.
+
+        Service Implementations SHOULD consider the security implications of providing webhooks, and include appropriate mitigations against Server Side Request Forgery (SSRF) attacks and similar.
+        Service Implementations SHOULD take appropriate steps to authorize the modification of existing webhooks. This may take the form of RBAC, or ABAC.
+      operationId: POST_service-webhooks
+      tags:
+        - Webhooks
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/webhook-post.json
+            schema:
+              $ref: schemas/webhook-post.json
+        required: true
+      responses:
+        "201":
+          description: Created. The webhook has been registered.
+          content:
+            application/json:
+              example:
+                $ref: examples/webhook-get-200.json
+              schema:
+                $ref: schemas/webhook-get.json
+        "400":
+          description: Bad request. Request body JSON is not valid or unsupported event filtering or transformation.
+  /service/webhooks/{webhook_id}:
+    parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Webhook identifier.
+    head:
+      summary: Webhook details
+      description: Return `/service/webhooks/{webhook_id}` path headers
+      operationId: HEAD_service-webhooks-webhook_id
+      tags:
+        - Webhooks
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Webhook details
+      description: |
+        Return the webhook details.
+
+        Service Implementations SHOULD take steps to avoid displaying URLs to users other than those who have suitable permissions (e.g. the owning user).
+      operationId: GET_service-webhooks-webhook_id
+      tags:
+        - Webhooks
+      responses:
+        "200":
+          description: Return the webhook details.
+          content:
+            application/json:
+              example:
+                $ref: examples/webhook-get-200.json
+              schema:
+                $ref: schemas/webhook-get.json
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Update webhook details
+      description: |
+        Update the configuration of an existing webhook.
+
+        Webhook messages will conform to the format in the `webhooks` section of the API docs, depending on the event type (as defined in the same section).
+
+        HTTP events sent by the service to a client webhook's endpoint SHOULD include a header with the header name given by `api_key_name` and the header value given by `api_key_value`.
+        Clients SHOULD verify this against the value they provided when registering the webhook.
+
+        Service Implementations MAY partially support event filtering and transformations.
+        Service Implementations SHALL return a 400 response code if the filtering or transformation specified in the request is not supported.
+
+        Service Implementations SHOULD consider the security implications of providing webhooks, and include appropriate mitigations against Server Side Request Forgery (SSRF) attacks and similar.
+        Service Implementations SHOULD take appropriate steps to authorize the modification of existing webhooks. This may take the form of RBAC, or ABAC.
+      operationId: PUT_service-webhooks-webhook_id
+      tags:
+        - Webhooks
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/webhook-put.json
+            schema:
+              $ref: schemas/webhook-put.json
+        required: true
+      responses:
+        "200":
+          description: Success. The webhook has been updated.
+          content:
+            application/json:
+              example:
+                $ref: examples/webhook-get-200.json
+              schema:
+                $ref: schemas/webhook-get.json
+        "400":
+          description: Bad request. Request body JSON is not valid or unsupported event filtering or transformation.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Webhook
+      description: |
+        Delete the webhook.
+
+        Service Implementations SHOULD consider the security implementations of providing webhooks, and include appropriate mitigations against Server Side Request Forgery (SSRF) attacks and similar. Service Implementations SHOULD take appropriate steps to authorize the deleting of webhooks. This may take the form of RBAC, or ABAC.
+      operationId: DELETE_service-webhooks-webhook_id
+      tags:
+        - Webhooks
+      responses:
+        "204":
+          description: No content. The webhook has been deleted.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_delete_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks:
+    head:
+      summary: List Tracks
+      description: Return `/tracks` path headers
+      operationId: HEAD_tracks
+      tags:
+        - Tracks
+      parameters:
+        - name: timerange
+          in: query
+          description: Filter on Tracks that have Track Events partially or wholly overlapping with timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+        - name: label
+          in: query
+          description: Filter on Tracks that have the given `label`.
+          schema:
+            type: string
+        - name: schema_id
+          in: query
+          description: Filter on Tracks that use the given Payload Schema ID in `schema_id`.
+          schema:
+            $ref: schemas/uuid.json
+        - name: tag.{name}
+          in: query
+          description: |
+            Filter on Tracks that have a tag named {name} with a value in the given comma-separated list of values.
+            The {name} and the value MUST be URL encoded where special characters are present.
+            Where the tag's value is a string, at least one of the given values will match.
+            Where the tag's value is an array, at least one value in the array will match at least one of the given values.
+            Partial string matches of the values are not valid.
+          schema:
+            $ref: schemas/url-tag-list.json
+        - name: tag_exists.{name}
+          in: query
+          description: |
+            Filter on Tracks that have a tag named {name} regardless of value.
+            {name} MUST be URL encoded where special characters are present.
+            If set to true then the presence of the tag is filtered for.
+            If set to false then its absence is.
+            If left out then no filtering on tag presence is performed.
+          schema:
+            type: boolean
+        - name: editable_events
+          in: query
+          description: Filter on Tracks that have `editable_events` set to the specified value.
+          schema:
+            type: boolean
+        - name: timeline_reference.entity_id
+          in: query
+          description: |
+            Filter on Tracks where `entity_id` in `timeline_reference` matches any of the URIs used to generate the value of this parameter.
+            The value of this parameter is generated by percent-encoding each URI and then joining them into a string using a comma as a separator.
+            A URI is considered a "match" for `entity_id` if it is an exact string match. As such, two strings are not considered a match even if they only differ in terms of length (sub-strings), case, or percent-encoding.
+            Note, when the URIs used to generate the value of this parameter appear in the request URL, each one will have been percent-encoded twice.
+          schema:
+            $ref: schemas/url-uri-list.json
+          example: |
+            "http%3A%2F%2Fexample.com%2Fentity%2F1,http%3A%2F%2Fexample.com%2Fentity%2F2"
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: ""
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+    get:
+      summary: List Tracks
+      description: Return the list of Tracks.
+      operationId: GET_tracks
+      tags:
+        - Tracks
+      parameters:
+        - name: timerange
+          in: query
+          description: Filter on Tracks that have Track Events partially or wholly overlapping with timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+        - name: label
+          in: query
+          description: Filter on Tracks that have the given `label`.
+          schema:
+            type: string
+        - name: schema_id
+          in: query
+          description: Filter on Tracks that use the given Payload Schema ID in `schema_id`.
+          schema:
+            $ref: schemas/uuid.json
+        - name: tag.{name}
+          in: query
+          description: |
+            Filter on Tracks that have a tag named {name} with a value in the given comma-separated list of values.
+            The {name} and the value MUST be URL encoded where special characters are present.
+            Where the tag's value is a string, at least one of the given values will match.
+            Where the tag's value is an array, at least one value in the array will match at least one of the given values.
+            Partial string matches of the values are not valid.
+          schema:
+            $ref: schemas/url-tag-list.json
+        - name: tag_exists.{name}
+          in: query
+          description: |
+            Filter on Tracks that have a tag named {name} regardless of value.
+            {name} MUST be URL encoded where special characters are present.
+            If set to true then the presence of the tag is filtered for.
+            If set to false then its absence is.
+            If left out then no filtering on tag presence is performed.
+          schema:
+            type: boolean
+        - name: editable_events
+          in: query
+          description: Filter on Tracks that have `editable_events` set to the specified value.
+          schema:
+            type: boolean
+        - name: timeline_reference.entity_id
+          in: query
+          description: |
+            Filter on Tracks where `entity_id` in `timeline_reference` matches any of the URIs used to generate the value of this parameter.
+            The value of this parameter is generated by percent-encoding each URI and then joining them into a string using a comma as a separator.
+            A URI is considered a "match" for `entity_id` if it is an exact string match. As such, two strings are not considered a match even if they only differ in terms of length (sub-strings), case, or percent-encoding.
+            Note, when the URIs used to generate the value of this parameter appear in the request URL, each one will have been percent-encoded twice.
+          schema:
+            $ref: schemas/url-uri-list.json
+          example: |
+            "http%3A%2F%2Fexample.com%2Fentity%2F1,http%3A%2F%2Fexample.com%2Fentity%2F2"
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: Return the list of Tracks.
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+          content:
+            application/json:
+              example:
+                $ref: examples/tracks-get-200.json
+              schema:
+                type: array
+                items:
+                  $ref: schemas/track.json
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+  /tracks/{track_id}:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Details
+      description: Return `/tracks/{track_id}` path headers
+      operationId: HEAD_tracks-track_id
+      tags:
+        - Tracks
+      parameters:
+        - name: include_timerange
+          in: query
+          description: Include `timerange` in the response.
+          schema:
+            default: false
+            type: boolean
+        - name: timerange
+          in: query
+          description: Limit `timerange` of the response to the timerange over which Track Events partially or wholly overlap with the timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Details
+      description: Return the Track details.
+      operationId: GET_tracks-track_id
+      tags:
+        - Tracks
+      parameters:
+        - name: include_timerange
+          in: query
+          description: Include `timerange` in the response.
+          schema:
+            default: false
+            type: boolean
+        - name: timerange
+          in: query
+          description: Limit `timerange` of the response to the timerange over which Track Events partially or wholly overlap with the timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+      responses:
+        "200":
+          description: Return the Track details.
+          content:
+            application/json:
+              schema:
+                $ref: schemas/track.json
+              example:
+                $ref: examples/track-get-200-transcript.json
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Replace Track
+      description: |
+        Create or replace the Track metadata.
+
+        Clients should aim to populate as many of the Track metadata fields as possible and practical. The fewer parameters that are set, the higher the likelihood that reading clients will be unable to determine compatibility.
+
+        Some parameters may be ignored/overridden by Service Implementations. This is to enable the Track JSON-blob to be re-used with no/minimal editing in various use cases. Such parameters are called out in their description.
+
+        Track metadata can only be replaced/updated if:
+
+        * The Track property `read_only` is not 'true'
+        * The changes do not invalidate any Track Events owned by the Track
+          * Note, determining the impact of Track metadata edits on all these Track Events could be a costly compute operation and so Service Implementations MAY choose to limit the Track metadata modifications that are permitted in certain scenarios.
+      operationId: PUT_tracks-track_id
+      tags:
+        - Tracks
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/track-put-transcript.json
+            schema:
+              $ref: schemas/track.json
+        required: true
+      responses:
+        "201":
+          description: Created. The Track has been created.
+          content:
+            application/json:
+              example:
+                $ref: examples/track-put-201.json
+              schema:
+                $ref: schemas/track.json
+        "204":
+          description: No content. The Track has been updated.
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_request_body"
+        "403":
+          description: Forbidden. You do not have permission to modify this Track. It could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_valid"
+    delete:
+      summary: Delete Track
+      description: |
+        Delete the Track and all Track Events owned by the Track.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+
+        If Track Event deletion takes too long then this request will return 202 Accepted and the `Location` header will point to a Track Delete Request to monitor deletion progress.
+      operationId: DELETE_tracks-track_id
+      tags:
+        - Tracks
+      responses:
+        "202":
+          description: Accepted. This request has taken longer than the configured timeout, and will continue asynchronously.
+          headers:
+            Location:
+              schema:
+                type: string
+                example: /track-delete-request/{request_id}
+          content:
+            application/json:
+              schema:
+                $ref: schemas/track-delete-request.json
+              example:
+                $ref: examples/track-delete-request-get-200.json
+        "204":
+          description: No content. The Track and all its Track Events have been deleted.
+        "403":
+          description: Forbidden. You do not have permission to delete this Track. It could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/tags:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: List Track Tags
+      description: Return `/tracks/{track_id}/tags` path headers
+      operationId: HEAD_tracks-track_id-tags
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: List Track Tags
+      description: Return the Track `tags` value.
+      operationId: GET_tracks-track_id-tags
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the Track `tags` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/track-get-200-transcript.json#/tags
+              schema:
+                $ref: schemas/tags.json
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/tags/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The tag name (used as the key in `tags`). {name} MUST be URL encoded where special characters are present.
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Tag Value
+      description: Return `/tracks/{track_id}/tags/{name}` path headers
+      operationId: HEAD_tracks-track_id-tags-name
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Tag Value
+      description: Return the tag value associated with the tag name (where name is used as the key in `tags`).
+      operationId: GET_tracks-track_id-tags-name
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the tag value associated with the tag name (where name is used as the key in `tags`).
+          content:
+            application/json:
+              example: |
+                "ingest_service_api"
+              schema:
+                oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Track Tag
+      description: |
+        Create or update the Track tag (where name is used as the key in `tags`).
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: PUT_tracks-track_id-tags-name
+      tags:
+        - Tracks (granular)
+      requestBody:
+        content:
+          application/json:
+            example: |
+              "new_value"
+            schema:
+              oneOf:
+                - type: string
+                - type: array
+                  items:
+                    type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The tag has been created or updated.
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_request_body"
+        "403":
+          description: Forbidden. You do not have permission to modify this Track property. The Track could be marked read-only.
+        "404":
+          description: Not found. The specified Track does not exist and/or the tag name in the path is invalid.
+    delete:
+      summary: Delete Track Tag
+      description: |
+        Delete the Track tag (where name is used as the key in `tags`).
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: DELETE_tracks-track_id-tags-name
+      tags:
+        - Tracks (granular)
+      responses:
+        "204":
+          description: No content. The Track tag has been deleted.
+        "403":
+          description: Forbidden. You do not have permission to delete this tag. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/description:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Description
+      description: Return `/tracks/{track_id}/description` path headers
+      operationId: HEAD_tracks-track_id-description
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Description
+      description: Return the Track `description` value.
+      operationId: GET_tracks-track_id-description
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the Track `description` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/track-get-200-transcript.json#/description
+              schema:
+                description: Freeform text describing the Track. This should be a human-readable description that may be displayed in detailed views of Tracks. The description should be longer and more detailed than `label`.
+                type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Track Description
+      description: |
+        Create or update Track `description` with the given value.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: PUT_tracks-track_id-description
+      tags:
+        - Tracks (granular)
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/track-get-200-transcript.json#/description
+            schema:
+              description: Freeform text describing the Track. This should be a human-readable description that may be displayed in detailed views of Tracks. The description should be longer and more detailed than `label`.
+              type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The Track `description` has been created or updated with the given value.
+        "400":
+          description: Bad request. Invalid Track `description` value.
+        "403":
+          description: Forbidden. You do not have permission to modify the `description` property. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Track Description
+      description: |
+        Delete the Track `description` property.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: DELETE_tracks-track_id-description
+      tags:
+        - Tracks (granular)
+      responses:
+        "204":
+          description: No content. The Track `description` property has been deleted.
+        "403":
+          description: Forbidden. You do not have permission to modify the `description` property. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/label:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Label
+      description: Return `/tracks/{track_id}/label` path headers
+      operationId: HEAD_tracks-track_id-label
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Label
+      description: Return the Track `label` value.
+      operationId: GET_tracks-track_id-label
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the Track `label` value.
+          content:
+            application/json:
+              example:
+                $ref: examples/track-get-200-transcript.json#/label
+              schema:
+                description: Freeform string label for the Track. This should be a very short, human-readable label that may be displayed in listings of Tracks.
+                type: string
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Create or Update Track Label
+      description: |
+        Create or update Track `label` with the given value.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: PUT_tracks-track_id-label
+      tags:
+        - Tracks (granular)
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/track-get-200-transcript.json#/label
+            schema:
+              description: Freeform string label for the Track. This should be a very short, human-readable label that may be displayed in listings of Tracks.
+              type: string
+        required: true
+      responses:
+        "204":
+          description: No content. The Track `label` has been created or updated with the given value.
+        "400":
+          description: Bad request. Invalid Track `label` value.
+        "403":
+          description: Forbidden. You do not have permission to modify the `label` property. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Track Label
+      description: |
+        Delete the Track `label` property.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: DELETE_tracks-track_id-label
+      tags:
+        - Tracks (granular)
+      responses:
+        "204":
+          description: No content. The Track `label` property has been deleted.
+        "403":
+          description: Forbidden. You do not have permission to modify the `label` property. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/read_only:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Read-Only
+      description: Return `/tracks/{track_id}/read_only` path headers
+      operationId: HEAD_tracks-track_id-read_only
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Read-Only
+      description: Return the Track `read_only` value.
+      operationId: GET_tracks-track_id-read_only
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the Track `read_only` value.
+          content:
+            application/json:
+              example: false
+              schema:
+                description: If set to 'true', Service Implementations MUST reject client requests to create, modify or delete Track metadata (other than the `read_only` property) or its Track Events. Service Implementations MUST also reject requests to delete the Track.
+                type: boolean
+                default: false
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Set Track Read-Only
+      description: Set Track `read_only` with the given value.
+      operationId: PUT_tracks-track_id-read_only
+      tags:
+        - Tracks (granular)
+      requestBody:
+        content:
+          application/json:
+            example: false
+            schema:
+              description: If set to 'true', Service Implementations MUST reject client requests to create, modify or delete Track metadata (other than the `read_only` property) or its Track Events. Service Implementations MUST also reject requests to delete the Track.
+              type: boolean
+              default: false
+        required: true
+      responses:
+        "204":
+          description: No content. The Track `read_only` has been set with the given value.
+        "400":
+          description: Bad request. Invalid Track `read_only` value.
+        "403":
+          $ref: "#/components/responses/trait_resource_403_modify_forbidden"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/allow_overlaps:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Allow Overlaps
+      description: Return `/tracks/{track_id}/allow_overlaps` path headers
+      operationId: HEAD_tracks-track_id-allow_overlaps
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Allow Overlaps
+      description: Return the Track `allow_overlaps` value.
+      operationId: GET_tracks-track_id-allow_overlaps
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the Track `allow_overlaps` value.
+          content:
+            application/json:
+              example: true
+              schema:
+                description: If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'true' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.
+                type: boolean
+                default: true
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Set Track Allow Overlaps
+      description: |
+        Set Track `allow_overlaps` with the given value.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+
+        Setting `allow_overlaps` to true is only permitted if the Track does not own any Track Events with overlapping `timerange` values.
+      operationId: PUT_tracks-track_id-allow_overlaps
+      tags:
+        - Tracks (granular)
+      requestBody:
+        content:
+          application/json:
+            example: true
+            schema:
+              description: If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'true' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.
+              type: boolean
+              default: true
+        required: true
+      responses:
+        "204":
+          description: No content. The Track `allow_overlaps` has been set with the given value.
+        "400":
+          description: Bad request. Invalid Track `allow_overlaps` value. If setting `allow_overlaps` to true, this will only be permitted if the Track does not own any Track Events with overlapping `timerange` values.
+        "403":
+          description: Forbidden. You do not have permission to modify the `allow_overlaps` property. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/editable_events:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: Track Editable Events
+      description: Return `/tracks/{track_id}/editable_events` path headers
+      operationId: HEAD_tracks-track_id-editable_events
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Editable Events
+      description: Return the Track `editable_events` value.
+      operationId: GET_tracks-track_id-editable_events
+      tags:
+        - Tracks (granular)
+      responses:
+        "200":
+          description: Return the Track `editable_events` value.
+          content:
+            application/json:
+              example: true
+              schema:
+                description: If set to 'false', service implementations MUST reject client requests to edit existing Track Events owned by the Track.
+                type: boolean
+                default: true
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    put:
+      summary: Set Track Editable Events
+      description: |
+        Set Track `editable_events` with the given value.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+      operationId: PUT_tracks-track_id-editable_events
+      tags:
+        - Tracks (granular)
+      requestBody:
+        content:
+          application/json:
+            example: true
+            schema:
+              description: If set to 'false', service implementations MUST reject client requests to edit existing Track Events owned by the Track.
+              type: boolean
+              default: true
+        required: true
+      responses:
+        "204":
+          description: No content. The Track `editable_events` has been set with the given value.
+        "400":
+          description: Bad request. Invalid Track `editable_events` value.
+        "403":
+          description: Forbidden. You do not have permission to modify the `editable_events` property. The Track could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /tracks/{track_id}/events:
+    parameters:
+      - name: track_id
+        in: path
+        required: true
+        schema:
+          $ref: schemas/uuid.json
+        description: The Track identifier.
+    head:
+      summary: List Track Events
+      description: Return `/tracks/{track_id}/events` path headers
+      operationId: HEAD_tracks-track_id-events
+      tags:
+        - TrackEvents
+      parameters:
+        - name: ids
+          in: query
+          description: Filter on Track Event identifier(s).
+          schema:
+            $ref: schemas/uuid-list.json
+        - name: timerange
+          in: query
+          description: Return only the Track Events that partially or wholly overlap with the timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+        - name: reverse_order
+          in: query
+          description: Return Track Events in reverse time order.
+          schema:
+            default: false
+            type: boolean
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: ""
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+            X-Paging-Reverse-Order:
+              $ref: "#/components/headers/X-Paging-Reverse-Order"
+            X-Paging-Timerange:
+              $ref: "#/components/headers/X-Paging-Timerange"
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: List Track Events
+      description: |
+        Return the list of Track Events owned by the Track.
+
+        Each Track Event attaches payload data to a specified timerange on the Track timeline.
+
+        The response body is an array of Track Events. This array MAY be empty.
+
+        Sorting of results:
+
+        * Track Events are sorted by `timerange`, in ascending order by default.
+        * When sorting in ascending order: Track Events are sorted using the start timestamp of the `timerange`.
+        * When sorting in descending order: Track Events are sorted by the end timestamp of the `timerange`.
+        * If multiple Track Events have the same sort order:
+          * These Track Events are then sorted by the other timestamp of the `timerange`.
+          * If multiple Track Events still have the same sort order:
+            * These Track Events are then sorted by `id`.
+        * Service Implementations MUST take into account the inclusive/exclusive marker associated with a timestamp when it is used for sorting.
+
+        Pagination:
+
+        * Clients should use the pagination options to limit the results to a timerange and/or count.
+        * Service Implementations may also limit the results returned. This will be signalled via the paging headers in the response.
+      operationId: GET_tracks-track_id-events
+      tags:
+        - TrackEvents
+      parameters:
+        - name: ids
+          in: query
+          description: Filter on Track Event identifier(s).
+          schema:
+            $ref: schemas/uuid-list.json
+        - name: timerange
+          in: query
+          description: Return only the Track Events that partially or wholly overlap with the timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+        - name: reverse_order
+          in: query
+          description: Return Track Events in reverse time order.
+          schema:
+            default: false
+            type: boolean
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: Return the list of Track Events owned by the Track.
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+            X-Paging-Reverse-Order:
+              $ref: "#/components/headers/X-Paging-Reverse-Order"
+            X-Paging-Timerange:
+              $ref: "#/components/headers/X-Paging-Timerange"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/track-event-get.json
+              example:
+                $ref: examples/track-events-get-200.json
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    post:
+      summary: Create or Modify Track Events
+      description: |
+        Create or modify either a single Track Event or an array of Track Events.
+
+        Each Track Event attaches payload data to a specified timerange on the Track timeline.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+
+        The request body must consist of either a single Track Event or an array of one or more Track Events.
+
+        Each Track Event in the request body MAY specify an `id` to identify the Track Event. For example, this could be used to edit Track Events or when transferring Tracks between Store Instances.
+
+        For each Track Event in the request body:
+
+        * If the Track Event does not specify an `id` then this is an instruction to create a new Track Event in the Store Instance. The Service Implementation MUST generate an `id` for the Track Event.
+        * If the Track Event specifies an `id`:
+          * If a Track Event with this `id` already exists in the Store Instance then this is an instruction to replace it with the Track Event provided.
+          * If a Track Event with this `id` does not exist in the Store Instance then this is an instruction to create a new Track Event with the specified `id`.
+
+        The Service Implementation SHOULD attempt to process all the Track Events in the request body regardless of any errors that might occur. That is, an error in processing one Track Event SHOULD NOT prevent the other Track Events from being processed.
+
+        A 200 response provides the results of processing the Track Events. Inside this response body, the `http_status_code` property MUST use the following values:
+
+        * `200`: Success. Track Event replaced/modified/updated.
+          * This applies even if the values of the Track Event properties have not changed, in which case the Track Event can be considered "reaffirmed".
+        * `201`: Success. Track Event created.
+        * `400`: Error. The Track Event violates at least one constraint. Such constraints include:
+          * The `id` of each Track Event MUST be unique within the Store Instance.
+          * Each Track Event MUST belong to exactly one Track. As such, each Track Event attaches one `payload` to one `timerange` on one Track.
+          * `payload` MUST validate against the Track's Payload Schema, identified by the `schema_id` property of the Track.
+          * `timerange` MUST be valid according to the `timerange` definition and the relevant Track properties (such as `edit_rate` and `allow_overlaps`).
+        * `403`: Error. You do not have permission to carry out the creation/modification of this Track Event.
+      operationId: POST_tracks-track_id-events
+      tags:
+        - TrackEvents
+      requestBody:
+        content:
+          application/json:
+            example:
+              $ref: examples/track-event-post.json
+            schema:
+              oneOf:
+                - $ref: schemas/track-event-post.json
+                - type: array
+                  items:
+                    $ref: schemas/track-event-post.json
+                  minItems: 1
+        required: true
+      responses:
+        "200":
+          description: Return the list of Track Events responses.
+          content:
+            application/json:
+              schema:
+                $ref: schemas/track-event-post-responses.json
+              example:
+                $ref: examples/track-event-post-responses.json
+        "400":
+          description: Bad request. The request body JSON is not valid with respect to the specified JSON Schema.
+        "403":
+          description: Forbidden. You do not have permission to modify this Track. It could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    delete:
+      summary: Delete Track Events
+      description: |
+        Delete the Track Events owned by the Track.
+
+        Only permitted if the Track property `read_only` is not 'true'.
+
+        If Track Event deletion takes too long then this request will return 202 Accepted and the `Location` header will point to a Track Delete Request to monitor deletion progress.
+      operationId: DELETE_tracks-track_id-events
+      tags:
+        - TrackEvents
+      parameters:
+        - name: timerange
+          in: query
+          description: Delete only the Track Events that wholly overlap with the timerange specified.
+          schema:
+            default: _
+            allOf:
+              - $ref: schemas/timerange.json
+        - name: ids
+          in: query
+          description: Filter on Track Event identifier(s).
+          schema:
+            $ref: schemas/uuid-list.json
+      responses:
+        "202":
+          description: Accepted. This request has taken longer than the configured timeout, and will continue asynchronously.
+          headers:
+            Location:
+              schema:
+                type: string
+                example: /track-delete-requests/{request_id}
+          content:
+            application/json:
+              schema:
+                $ref: schemas/track-delete-request.json
+              example:
+                $ref: examples/track-delete-request-get-200.json
+        "204":
+          description: No content. The Track Events have been deleted.
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+        "403":
+          description: Forbidden. You do not have permission to modify this Track. It could be marked read-only.
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+  /track-delete-requests:
+    head:
+      summary: List Track Delete Requests
+      description: Return `/track-delete-requests` path headers
+      operationId: HEAD_track-delete-requests
+      tags:
+        - TrackDeleteRequests
+      parameters:
+        - name: reverse_order
+          in: query
+          description: Return Track Delete Requests in reverse order.
+          schema:
+            default: false
+            type: boolean
+        - name: sort_by
+          in: query
+          description: |
+            Parameter to sort Track Delete Requests by.
+            `created` and `expiry` sort most recent first by default.
+            Sorting may be reversed using the `reverse_order` query parameter.
+            Assume `created` if not set.
+            For resources where the selected parameter is unset, `id` shall be used.
+            Resources using this fallback shall be sorted after those that aren't by default, and before when `reverse_order` is `true`.
+          schema:
+            type: string
+            enum:
+              - created
+              - expiry
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: ""
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+            X-Paging-Reverse-Order:
+              $ref: "#/components/headers/X-Paging-Reverse-Order"
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+    get:
+      summary: List Track Delete Requests
+      description: |
+        Return the list of Track Delete Requests.
+
+        A Track Delete Request is created when a client DELETEs a long timerange of Track Events, which takes longer than a single HTTP request.
+
+        Track Delete Requests currently being worked on are listed, for monitoring in development.
+
+        This will not necessarily list all requests, nor return a consistent set in any particular order, and should not be relied upon by clients. However if there are any requests in the system, it will always return at least one.
+      operationId: GET_track-delete-requests
+      tags:
+        - TrackDeleteRequests
+      parameters:
+        - name: reverse_order
+          in: query
+          description: Return Track Delete Requests in reverse order.
+          schema:
+            default: false
+            type: boolean
+        - name: sort_by
+          in: query
+          description: |
+            Parameter to sort Track Delete Requests by.
+            `created` and `expiry` sort most recent first by default.
+            Sorting may be reversed using the `reverse_order` query parameter.
+            Assume `created` if not set.
+            For resources where the selected parameter is unset, `id` shall be used.
+            Resources using this fallback shall be sorted after those that aren't by default, and before when `reverse_order` is `true`.
+          schema:
+            type: string
+            enum:
+              - created
+              - expiry
+        - $ref: "#/components/parameters/trait_resource_paged_page"
+        - $ref: "#/components/parameters/trait_resource_paged_limit"
+      responses:
+        "200":
+          description: Return the list of Track Delete Requests.
+          headers:
+            Link:
+              $ref: "#/components/headers/Link"
+            X-Paging-NextKey:
+              $ref: "#/components/headers/X-Paging-NextKey"
+            X-Paging-Limit:
+              $ref: "#/components/headers/X-Paging-Limit"
+            X-Paging-Count:
+              $ref: "#/components/headers/X-Paging-Count"
+            X-Paging-Reverse-Order:
+              $ref: "#/components/headers/X-Paging-Reverse-Order"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/track-delete-request.json
+              example:
+                $ref: examples/track-delete-requests-get-200.json
+        "400":
+          $ref: "#/components/responses/trait_resource_400_invalid_query_options"
+  /track-delete-requests/{request_id}:
+    parameters:
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+    head:
+      summary: Track Delete Request Details
+      description: Return `/track-delete-requests/{request_id}` path headers
+      operationId: HEAD_track-delete-requests-request_id
+      tags:
+        - TrackDeleteRequests
+      responses:
+        "200":
+          description: ""
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+    get:
+      summary: Track Delete Request Details
+      description: |
+        Return the Track Delete Request details.
+
+        A Track Delete Request is created when a client DELETEs a long timerange of Track Events, which takes longer than a single HTTP request.
+
+        Clients will be pointed here to monitor the request's progress.
+      operationId: GET_track-delete-requests-request_id
+      tags:
+        - TrackDeleteRequests
+      responses:
+        "200":
+          description: Return the Track Delete Request details.
+          content:
+            application/json:
+              schema:
+                $ref: schemas/track-delete-request.json
+              example:
+                $ref: examples/track-delete-request-get-200.json
+        "404":
+          $ref: "#/components/responses/trait_resource_404_path_not_found"
+webhooks:
+  schemas/created:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Payload Schema Created Notification
+              description: Information about a Payload Schema which has been newly created in this Service Instance
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the new Payload Schema was created
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: schemas/created
+                event:
+                  type: object
+                  required:
+                    - schema
+                  properties:
+                    schema:
+                      $ref: schemas/schema.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  schemas/updated:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Payload Schema metadata Updated Notification
+              description: Information about a Payload Schema for which the metadata has been modified.
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the Payload Schema's metadata was modified
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: schemas/updated
+                event:
+                  type: object
+                  required:
+                    - schema
+                  properties:
+                    schema:
+                      $ref: schemas/schema.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  schemas/deleted:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Payload Schema Deleted Notification
+              description: Notification that a Payload Schema has been deleted.
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the Payload Schema was deleted
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: schemas/deleted
+                event:
+                  type: object
+                  required:
+                    - schema_id
+                  properties:
+                    schema_id:
+                      $ref: schemas/uuid.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  tracks/created:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Track Created Notification
+              description: Information about a Track which has been newly created in this Service Instance
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the new Track was created
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: tracks/created
+                event:
+                  type: object
+                  required:
+                    - track
+                  properties:
+                    track:
+                      $ref: schemas/track.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  tracks/updated:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Track Updated Notification
+              description: Information about a Track for which the metadata has been modified.
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the Track was modified
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: tracks/updated
+                event:
+                  type: object
+                  required:
+                    - track
+                  properties:
+                    track:
+                      $ref: schemas/track.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  tracks/deleted:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Track Deleted Notification
+              description: Notification that a Track has been deleted (or scheduled for deletion).
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the Track was deleted
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: tracks/deleted
+                event:
+                  type: object
+                  required:
+                    - track_id
+                  properties:
+                    track_id:
+                      $ref: schemas/uuid.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  tracks/events_added:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Track Events Added
+              description: |
+                Notification that new Track Events have been added to a Track.
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the most recent addition of a Track Event in this batch took place (and the message generated)
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: tracks/events_added
+                event:
+                  type: object
+                  required:
+                    - track_id
+                    - track_events
+                  properties:
+                    track_id:
+                      $ref: schemas/uuid.json
+                    track_events:
+                      type: array
+                      items:
+                        $ref: schemas/track-event-get.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  tracks/events_updated:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Track Events Updated
+              description: |
+                Notification that Track Events on a Track have been updated.
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the most recent update of a Track Event in this batch took place (and the message generated)
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: tracks/events_updated
+                event:
+                  type: object
+                  required:
+                    - track_id
+                    - track_events
+                  properties:
+                    track_id:
+                      $ref: schemas/uuid.json
+                    track_events:
+                      type: array
+                      items:
+                        $ref: schemas/track-event-get.json
+      responses:
+        "200":
+          description: Webhook received successfully
+  tracks/events_deleted:
+    post:
+      security:
+        - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Track Events Deleted
+              description: |
+                Notification that Track Events have been deleted from a Track.
+              required:
+                - event_timestamp
+                - event_type
+                - event
+              properties:
+                event_timestamp:
+                  description: Timestamp at which the most recent delete of a Track Event in the reported list (`track_event_ids`) took place (and the message generated)
+                  type: string
+                  format: date-time
+                event_type:
+                  type: string
+                  const: tracks/events_deleted
+                event:
+                  type: object
+                  required:
+                    - track_id
+                    - track_event_ids
+                  properties:
+                    track_id:
+                      $ref: schemas/uuid.json
+                    timerange:
+                      description: The timerange covered by the Track Events that have been deleted. This property MUST only be present if all the Track Events that wholly overlap with this timerange have been deleted from the specified Track. The `timerange` start MUST match the earliest start value of a deleted Track Event's `timerange`. The `timerange` end MUST match the latest end value of a deleted Track Event's `timerange`.
+                      $ref: schemas/timerange.json
+                    track_event_ids:
+                      description: The Track Event IDs that have been deleted
+                      $ref: schemas/uuid-list.json
+      responses:
+        "200":
+          description: Webhook received successfully
+components:
+  responses:
+    trait_resource_400_invalid_query_options:
+      description: Bad request. Invalid query options.
+    trait_resource_400_invalid_request_body:
+      description: Bad request. Request body JSON is not valid. For example, one or more JSON properties could have invalid values.
+    trait_resource_403_delete_forbidden:
+      description: Forbidden. You do not have permission to delete this resource.
+    trait_resource_403_modify_forbidden:
+      description: Forbidden. You do not have permission to modify this resource.
+    trait_resource_404_path_not_found:
+      description: Not found. The resource identified by the path does not exist.
+    trait_resource_404_path_not_valid:
+      description: Not found. The path is not a valid resource identifier. One or more parameters in the path are incorrectly formatted.
+  parameters:
+    trait_resource_paged_limit:
+      name: limit
+      in: query
+      description: Restrict the response to the specified number of results. Service Implementations may specify their own default and maximum for the limit
+      schema:
+        type: integer
+    trait_resource_paged_page:
+      name: page
+      in: query
+      description: Opaque string generated by the Service Instance that is used to access a specific page of results. Clients should read the next URL from the `Link` header returned with responses, or use the value of the returned `X-Paging-NextKey` header. If `page` is not supplied, the first page is accessed. Service Implementations should ensure a consistent sort order is applied to pages of results.
+      schema:
+        type: string
+  headers:
+    Link:
+      description: Provides references to cursors for paging. Only the 'rel' attribute with value 'next' and a link to the next page is currently supported. If 'next' is not present then it is the last page.
+      schema:
+        type: string
+    X-Paging-NextKey:
+      description: Opaque string that can be supplied to the `page` query parameter to get the next page of results.
+      schema:
+        type: string
+    X-Paging-Limit:
+      description: Identifies the current limit being used for paging. This may not match the requested value if the requested value was too high for the Service Implementation.
+      schema:
+        type: integer
+    X-Paging-Count:
+      description: The number of items in the returned data set.
+      schema:
+        type: integer
+    X-Paging-Reverse-Order:
+      description: The items are returned in reverse order.
+      schema:
+        type: boolean
+    X-Paging-Timerange:
+      description: Identifies the timerange for the returned data set.
+      schema:
+        $ref: schemas/timerange.json
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
+      description: |
+        HTTP basic authentication using a username and password.
+
+        This option should only be used in constrained cases where Bearer tokens are impractical, since the password is intrinsically long-lived, and managing user credentials across systems is difficult compared to using centralised auth (e.g. via OAuth2) with Bearer tokens
+    bearer_token_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        HTTP bearer token authentication.
+
+        The method through which a client should acquire a bearer token is assumed to be an OAuth2 grant (either the Authorization Code or Client Credentials grant), however the OpenAPI `OAuth Flow` object cannot be used because it requires that the relevant URLs are known in advance.
+
+        Clients should provide options to allow one (or both) grant types to be configured, as appropriate.
+
+        Where tokens are not JWTs, or are acquired through some other mechanism, the API key method should be used instead.
+    url_token_auth:
+      type: apiKey
+      name: access_token
+      in: query
+      description: |
+        URL token authentication.
+
+        The method through which a client should acquire the token is not specified: it is assumed this takes place in another way, and a TADS client may well be passed a URL to a TADS Service Instance including the token.
+
+        Clients should retain the token in the `access_token` query string parameter, and use it for subsequent requests to the TADS Service Instance in the same session.
+tags:
+  - name: Service
+    description: Documentation about the service itself, as found in all Cloud-fit services
+    externalDocs:
+      url: https://confluence.dev.bbc.co.uk/display/CloudFit/Service+Information+Resource
+  - name: Payload Schemas
+    description: |
+      Each Track is assigned a Payload Schema which will be used to validate the Track Event's `payload`.
+  - name: Payload Schemas (granular)
+    description: |
+      Granular access to Payload Schema properties
+  - name: Webhooks
+    description: Configures webhooks to deliver notifications externally. Optional, and may not be implemented
+  - name: Tracks
+    description: |
+      The grouping of related Track Events onto a shared timeline.
+  - name: Tracks (granular)
+    description: |
+      Granular access to Track properties
+  - name: TrackEvents
+    description: |
+      The association of Track Event payload data onto a given Track's timeline.
+  - name: TrackDeleteRequests
+    description: |
+      Resource for monitoring long running deletion of Tracks and Track Events.

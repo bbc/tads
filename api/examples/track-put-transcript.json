@@ -1,0 +1,12 @@
+{
+    "id": "20992138-abdb-4daf-84f3-a0e07dabb5ca",
+    "label": "Example Transcript",
+    "description": "This is an example of a transcript track",
+    "tags": {
+        "ingested_by": "ingest_service_api"
+    },
+    "schema_id": "adb87970-b03a-4266-b5d8-f3f6541fb73a",
+    "timeline_reference": {
+        "entity_id": "https://example-uri.com"
+    }
+}

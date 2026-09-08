@@ -1,0 +1,14 @@
+[
+    {
+        "timerange": "[0:0_1:0)",
+        "payload": {
+            "text": "This is an example payload."
+        }
+    },
+    {
+        "timerange": "[1:0_2:0)",
+        "payload": {
+            "text": "And this is another."
+        }
+    }
+]

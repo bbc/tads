@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "description": "Places Track Event payload data at a specific timerange on a Track's timeline.",
+    "title": "Track Event (base)",
+    "properties": {
+        "id": {
+            "description": "Track Event identifier",
+            "$ref": "uuid.json"
+        },
+        "payload": {
+            "description": "The payload data",
+            "type": "object"
+        },
+        "timerange": {
+            "description": "The timerange the payload data covers on the Track's timeline. For Track Events with a duration of greater than zero, timerange start SHOULD be inclusive and end SHOULD be exclusive. If such Track Events are contiguous (no gaps and no overlaps) then the end timestamp of one Track Event will be the same as the start timestamp of the next Track Event. The instantaneous timerange syntax is used for Track Events with a duration of zero. Format is described by the [TimeRange](#/schemas/timerange) type.",
+            "$ref": "timerange.json"
+        }
+    }
+}

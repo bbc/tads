@@ -1,0 +1,119 @@
+{
+    "title": "Track",
+    "description": "Describes a Track",
+    "type": "object",
+    "required": [
+        "id",
+        "schema_id",
+        "timeline_reference"
+    ],
+    "properties": {
+        "id": {
+            "description": "Track identifier",
+            "$ref": "uuid.json"
+        },
+        "label": {
+            "description": "Freeform string label for the Track. This should be a very short, human-readable label that may be displayed in listings of Tracks.",
+            "type": "string"
+        },
+        "description": {
+            "description": "Freeform text describing the Track. This should be a human-readable description that may be displayed in detailed views of Tracks. The description should be longer and more detailed than `label`.",
+            "type": "string"
+        },
+        "created_by": {
+            "description": "A string identifier for the entity that created the Track. Service Implementations SHOULD set suitable default values for `created_by` based on the principal accessing the system, and MAY permit clients to edit the value, subject to suitable permissions-based limitations.",
+            "type": "string"
+        },
+        "updated_by": {
+            "description": "A string identifier for the entity that updated the Track metadata most recently. Service Implementations SHOULD set suitable default values for `updated_by` based on the principal accessing the system, and MAY permit clients to edit the value, subject to suitable permissions-based limitations.",
+            "type": "string"
+        },
+        "timeline_reference": {
+            "description": "The specific timeline being used for the Event timings in this Track.",
+            "type": "object",
+            "required": [
+                "entity_id"
+            ],
+            "properties": {
+                "entity_id": {
+                    "description": "A reference to an entity with a timeline. This may be a URL for an entity in a system such as [TAMS](https://github.com/bbc/tams/blob/main/docs/appnotes/0014-referencing-tams-content-in-other-systems.md), a filesystem path, or some other unique/consistent identifier. Where a system provides guidance on referencing its entities from external systems, that guidance should be followed where possible.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "timeline_selected": {
+                    "description": "Identifies the timeline used, when the entity referenced by entity_id has more than one timeline.",
+                    "type": "string",
+                    "format": "uri"
+                }
+            }
+        },
+        "tags": {
+            "description": "Key value is a freeform string. WARNING: When updating a Track with `tags` set, `tags` will be replaced with the provided dictionary. `tags` WILL NOT be merged with the provided values. When `tags` is not set in the request, `tags` will be unset and will default to `{}`. To update individual tags, clients should use the [Create or Update Track Tag](#/operations/PUT_tracks-track_id-tags-name) endpoint.",
+            "$ref": "tags.json",
+            "default": {}
+        },
+        "metadata_version": {
+            "description": "A change to the Track metadata, not including metadata_version, metadata_updated, events_updated, or Track Events, results in a new version. If the metadata_version for Track instances is identical then the metadata is identical. Service Implementations SHOULD set suitable default values for `metadata_version` whenever Track metadata is changed and `metadata_version` is either not set by the client, or set to it's existing value. Service Implementations MAY permit clients to edit the value, subject to suitable permissions-based limitations. Where media is transferred between TADS Service Instances without changing the Track metadata, clients SHOULD maintain the `metadata_version`. To support this, Service Implementations SHOULD always accept the setting of `metadata_version` by the client on initial Track creation. Service Implementations SHOULD update this field where metadata is updated via child endpoints. Note that this specification places no requirements on incremental versioning. Service Implementations may, for example, choose to use hashes or date-time version identifiers.",
+            "type": "string"
+        },
+        "created": {
+            "description": "The date-time the Track was created in a given context, e.g. in the Service Instance. Service Implementations SHOULD ignore this if given in a PUT request, and instead manage it internally",
+            "type": "string",
+            "format": "date-time"
+        },
+        "metadata_updated": {
+            "description": "The date-time the Track metadata was updated in a given context, e.g. in the Service Instance. Service Implementations SHOULD ignore this if given in a PUT request, and instead manage it internally",
+            "type": "string",
+            "format": "date-time"
+        },
+        "events_updated": {
+            "description": "The date-time Track Events in this Track were updated (including creation, modification and deletion of Track Events) in a given context, e.g. in the Service Instance. Service Implementations SHOULD ignore this if given in a PUT request, and instead manage it internally",
+            "type": "string",
+            "format": "date-time"
+        },
+        "read_only": {
+            "description": "If set to 'true', Service Implementations MUST reject client requests to create, modify or delete Track metadata (other than the `read_only` property) or its Track Events. Service Implementations MUST also reject requests to delete the Track.",
+            "type": "boolean",
+            "default": false
+        },
+        "allow_overlaps": {
+            "description": "If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'true' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.",
+            "type": "boolean",
+            "default": true
+        },
+        "editable_events": {
+            "description": "If set to 'false', service implementations MUST reject client requests to edit existing Track Events owned by the Track.",
+            "type": "boolean",
+            "default": true
+        },
+        "timerange": {
+            "description": "The timerange covered by Track Events owned by the Track, as described by the [TimeRange](#/schemas/timerange) type. Service Implementations MUST ignore this if given in a PUT request, and instead manage it internally.",
+            "$ref": "timerange.json"
+        },
+        "schema_id": {
+            "description": "The ID of the Payload Schema that each Track Event `payload` in this Track MUST conform to. Service Implementations should reject requests to modify this parameter.",
+            "$ref": "uuid.json"
+        },
+        "edit_rate": {
+            "title": "Fixed Edit Rate",
+            "description": "Where set, the `timerange` of each Track Event owned by this Track MUST be normalised to a grid of this rate, with an epoch timestamp of `0:0`. When populating the `timerange` of each Track Event in this Track, Client Implementations MUST use a value that meets this requirement. Service Implementations MUST ensure that each Track Event in this Track has a `timerange` that meets this requirement.",
+            "type": "object",
+            "required": [
+                "numerator"
+            ],
+            "properties": {
+                "numerator": {
+                    "description": "numerator",
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                },
+                "denominator": {
+                    "description": "denominator",
+                    "type": "integer",
+                    "default": 1,
+                    "exclusiveMinimum": 0
+                }
+            }
+        }
+    }
+}

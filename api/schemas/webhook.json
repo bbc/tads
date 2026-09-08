@@ -1,0 +1,67 @@
+{
+    "title": "Register Webhook",
+    "description": "Register to receive updates via webhook",
+    "type": "object",
+    "required": [
+        "url",
+        "events"
+    ],
+    "properties": {
+        "url": {
+            "description": "The URL to which the Service Instance should make HTTP POST requests with event data",
+            "type": "string"
+        },
+        "api_key_name": {
+            "description": "The HTTP header name that is added to the event POST",
+            "type": "string"
+        },
+        "events": {
+            "description": "List of webhook event types to receive",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "schemas/created",
+                    "schemas/updated",
+                    "schemas/deleted",
+                    "tracks/created",
+                    "tracks/updated",
+                    "tracks/deleted",
+                    "tracks/events_added",
+                    "tracks/events_updated",
+                    "tracks/events_deleted"
+                ]
+            }
+        },
+        "schema_ids": {
+            "description": "Limit Payload Schema webhook events to Payload Schemas in the given list of Payload Schema IDs. Limit Track and Track Event webhook events to Tracks that have a `schema_id` in the given list of Payload Schema IDs.",
+            "type": "array",
+            "items": {
+                "$ref": "uuid.json"
+            }
+        },
+        "track_ids": {
+            "description": "Limit Track and Track Event webhook events to Tracks in the given list of Track IDs",
+            "type": "array",
+            "items": {
+                "$ref": "uuid.json"
+            }
+        },
+        "timeline_reference.entity_id": {
+            "description": "Limit Track and Track Event webhook events to Tracks that have a `timeline_reference.entity_id` in the given list of Timeline Reference Entity IDs (URIs). A URI is considered a \"match\" for `timeline_reference.entity_id` if it is an exact string match. As such, two strings are not considered a match even if they only differ in terms of length (sub-strings), case, or percent-encoding.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "format": "uri"
+            }
+        },
+        "editable_events": {
+            "description": "Limit Track and Track Event webhook events to Tracks that have `editable_events` set to the specified value.",
+            "type": "boolean"
+        },
+        "tags": {
+            "$ref": "tags.json",
+            "default": {}
+        }
+    }
+}

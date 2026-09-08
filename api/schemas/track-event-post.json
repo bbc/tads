@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "description": "Places Track Event payload data at a specific timerange on a Track's timeline.",
+    "title": "Track Event (POST)",
+    "required": [
+        "timerange",
+        "payload"
+    ],
+    "allOf": [
+        {
+            "$ref": "track-event.json"
+        }
+    ]
+}

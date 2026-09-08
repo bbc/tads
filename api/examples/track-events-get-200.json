@@ -1,0 +1,16 @@
+[
+    {
+        "timerange": "[0:0_1:0)",
+        "id": "6cf89caa-f0c7-430a-b17d-986486fc96f3",
+        "payload": {
+            "text": "This is an example payload."
+        }
+    },
+    {
+        "timerange": "[1:0_2:0)",
+        "id": "2ba73077-febe-4249-b415-9a55d9dcd0dd",
+        "payload": {
+            "text": "And this is another."
+        }
+    }
+]

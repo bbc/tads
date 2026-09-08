@@ -1,0 +1,66 @@
+{
+    "title": "Track Delete Request",
+    "description": "Describes an ongoing Track Delete Request",
+    "type": "object",
+    "required": [
+        "id",
+        "track_id",
+        "delete_track",
+        "status"
+    ],
+    "properties": {
+        "id": {
+            "description": "Delete Request ID",
+            "$ref": "uuid.json"
+        },
+        "track_id": {
+            "description": "ID of the Track to which the delete request relates",
+            "$ref": "uuid.json"
+        },
+        "timerange_to_delete": {
+            "description": "The timerange covered by the Track Events to be deleted in this request, as described by the [TimeRange](#/schemas/timerange) type. This property MUST only be present if all the Track Events (from the specified Track) that wholly overlap with this timerange are to be deleted in this request.",
+            "$ref": "timerange.json"
+        },
+        "timerange_remaining": {
+            "description": "The timerange covered by the Track Events not yet deleted by this request, as described by the [TimeRange](#/schemas/timerange) type. This property MUST only be present if `timerange_to_delete` is also present.",
+            "$ref": "timerange.json"
+        },
+        "delete_track": {
+            "description": "Indicates whether the Track itself is to be deleted after completing deletion of the selected Track Events.",
+            "type": "boolean"
+        },
+        "created": {
+            "description": "Date/Time when this delete request was created",
+            "type": "string",
+            "format": "date-time"
+        },
+        "created_by": {
+            "description": "A string identifier for the entity that created the delete request. Service Implementations SHOULD set suitable default values for `created_by` based on the principal accessing the system.",
+            "type": "string"
+        },
+        "updated": {
+            "description": "Date/Time when this delete request was updated",
+            "type": "string",
+            "format": "date-time"
+        },
+        "expiry": {
+            "description": "Date/Time when this delete request will be deleted",
+            "type": "string",
+            "format": "date-time"
+        },
+        "status": {
+            "description": "Status of the delete request",
+            "type": "string",
+            "enum": [
+                "created",
+                "started",
+                "done",
+                "error"
+            ]
+        },
+        "error": {
+            "description": "Provides more information for the error status, as described by the [Error](#/schemas/error) type",
+            "$ref": "error.json"
+        }
+    }
+}

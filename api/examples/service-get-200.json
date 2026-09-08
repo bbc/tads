@@ -1,0 +1,7 @@
+{
+    "name": "Example TADS",
+    "description": "An example Time-Addressable Data Store",
+    "type": "urn:x-tads:service.example",
+    "api_version": "0.1",
+    "service_version": "tads.0.1.0-a837ec6"
+}
