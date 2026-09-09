@@ -2,7 +2,7 @@
 
 ## Summary
 
-`timeline_selected` is intended to be used as an identifier for the specific timeline used for Track Event timings where the `entity_id` does not resolve to a single timeline.
+[`timeline_selected`](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks-track_id) is intended to be used as an identifier for the specific timeline used for Track Event timings where the `entity_id` does not resolve to a single timeline.
 The values for this property are defined in this document.
 
 The recommendation is to use `timeline_reference.entitiy_id` values that do not require disambiguation through the `timeline_selected` property in the first place, however this may not be feasible for all workflows.
@@ -19,7 +19,7 @@ timeline_reference: {
 ```
 
 `entity_id` is mandatory and in most scenarios should be enough to clearly specify the timeline used by the Track.
-This field signals that Track Events within the Track annotate the `entity_id` timeline at their timeranges.
+This field signals that Track Events within the Track annotate the `entity_id` timeline at their [timeranges](https://bbc.github.io/tads/0.1/index.html#/schemas/timerange).
 
 * In a Track with `entity_id` referencing a TAMS Source, a TADS Track Event with the timerange `[0:0_5:0)` annotates the TAMS media content between `[0:0_5:0)`.
 
