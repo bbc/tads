@@ -44,16 +44,16 @@ Once we and the community deem it appropriate, we’ll revisit the ownership of 
 
 ![A comparison of the TADS and TAMS data models. TADS with overlapping and sparse "Events" in a "Track" annotating a TAMS "Flow" with continuous media "Segments". Both against a shared timeline.](./docs/images/TADSAndTAMSDataModels.png)
 
-TADS allows you to create Tracks and store data Events on them.
+TADS allows you to [create Tracks](https://bbc.github.io/tads/0.1/index.html#/operations/PUT_tracks-track_id) and [store data Events](https://bbc.github.io/tads/0.1/index.html#/operations/POST_tracks-track_id-events) on them.
 Each Track shares a timeline with a media item in another system, such as TAMS or a file system.
 
 Event payloads are formatted as JSON.
-Each Track is associated with a managed Payload Schema, that uses [JSON Schema](https://json-schema.org/).
+Each Track is associated with a managed [Payload Schema](https://bbc.github.io/tads/0.1/index.html#/operations/PUT_schemas-schema_id), that uses [JSON Schema](https://json-schema.org/).
 Each new Event is validated against this Payload Schema.
 Many common data workflows require Events that overlap on the timeline (e.g. tracking visibility of actors in a video) and the editing of Events (e.g. progressive improvements to transcripts).
 TADS supports both.
 
-The TADS API provides similar mechanisms to TAMS for managing items in the store and receiving updates via Webhooks.
+The TADS API provides similar mechanisms to TAMS for managing items in the store and receiving updates via [Webhooks](https://bbc.github.io/tads/0.1/index.html#/operations/POST_service-webhooks).
 
 ## Why not use TAMS for data?
 
@@ -69,7 +69,7 @@ TADS aims to solve these issues by better supporting the storing of data in a da
 It returns data directly in Events listings.
 And it better supports search index systems.
 
-While the data models of TADS and TAMS contain some similar concepts, the requirement in TADS for the editing and overlapping of Events breaks important TAMS principles: immutability, and the use of a timerange to uniquely refer to a specific sequence of content.
+While the data models of TADS and [TAMS](https://github.com/bbc/tams/blob/main/docs/appnotes/0001-multi-mono-essence-flows-sources.md) contain some similar concepts, the requirement in TADS for the editing and overlapping of Events breaks important TAMS principles: immutability, and the use of a timerange to uniquely refer to a specific sequence of content.
 
 ## Building an ecosystem
 
@@ -79,7 +79,7 @@ It enables organisations (such as the BBC) to make best use of new capabilities 
 ![An example of a TADS workflow. The TADS API annotating media in TAMS and media files. Processes integrating with both for media analysis, data creation, content discovery, and playback. And a search engine indexing the data in TADS.](./docs/images/TADSWorkflow.png)
 
 TADS is an API specification for reading, writing and editing timeline data in a store.
-We expect it to be used alongside TAMS and other systems.
+We expect it to be [used alongside TAMS](https://github.com/bbc/tads/blob/main/docs/appnotes/0001-using-tads-with-tams.md) and other systems.
 How will all of these systems fit together, and what is missing from the current alpha release of TADS?
 
 ### Searching by data
@@ -116,7 +116,7 @@ Perhaps characteristics of Events (overlaps, gaps), nature of the data (purpose,
 ### Using TADS alongside TAMS
 
 TADS is well-suited to managing data that annotates media held in TAMS.
-We have provided initial recommendations for such integrations in TADS AppNote 0001.
+We have provided initial recommendations for such integrations in [TADS AppNote 0001](https://github.com/bbc/tads/blob/main/docs/appnotes/0001-using-tads-with-tams.md).
 But further recommendations are required for more advanced use cases.
 
 - How are the authorisation of media and data tied together?
