@@ -16,8 +16,8 @@ This is indicated using the `timeline_reference.entity_id` attribute of the Trac
 URIs MUST use the TAMS "pseudo-protocol" URI variant.
 i.e. use `tams://` in place of `https://`.
 Note that the TAMS service should still be accessible by replacing `tams://` with `https://` in any request.
-The [TAMS AppNote 0014](https://github.com/bbc/tams/blob/main/docs/appnotes/0014-referencing-tams-content-in-other-systems.md) URI variants referring to specific TimeRanges of Sources or Flows MUST NOT be used.
-As [TAMS Sources/Flows](https://github.com/bbc/tams/blob/main/docs/appnotes/0001-multi-mono-essence-flows-sources.md) each use a single unambiguous timeline, `timeline_reference.timeline_selected` shouldn't be populated.
+The [TAMS AppNote 0014](https://github.com/bbc/tams/blob/main/docs/appnotes/0014-referencing-tams-content-in-other-systems.md#uri-references) URI variants referring to specific TimeRanges of Sources or Flows MUST NOT be used.
+As [TAMS Sources/Flows](https://github.com/bbc/tams/blob/main/docs/appnotes/0001-multi-mono-essence-flows-sources.md) each use a single unambiguous timeline, [`timeline_reference.timeline_selected`](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks-track_id) shouldn't be populated.
 
 While the TADS Track's timeline is shared with a TAMS Source/Flow, its Track Events may cover different TimeRanges to the Flow's Segments.
 Consider a transcription that uses a Track Event per sentence.
@@ -108,7 +108,7 @@ The following is an example of Track metadata for a transcript.
 
 ### Finding TADS Tracks from TAMS Source/Flow IDs
 
-TADS Tracks may be filtered by their `timeline_reference.entity_id` using the `timeline_reference.entity_id` query parameter on the [`GET /tracks` method](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks), which accepts a comma-seperated list of percent-encoded URIs.
+TADS Tracks may be filtered by their `timeline_reference.entity_id` using the `timeline_reference.entity_id` query parameter on the [`GET /tracks` method](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks), which accepts a comma-separated list of percent-encoded URIs.
 
 The following request may be used to locate the example Track above, and any others with the same `timeline_reference.entity_id`.
 Note that the Entity ID has been percent-encoded twice.
@@ -136,7 +136,7 @@ Our original Source and these 3 additional resources may be queried, along with 
 
 > [!IMPORTANT]
 > Notice that the `timeline_reference.entity_id` values here have gone through two percent-encoding processes.
-> The first to encode each URI individually, ensuring any commas do not interfere with those used to seperate each URI in the list.
+> The first to encode each URI individually, ensuring any commas do not interfere with those used to separate each URI in the list.
 > The second to encode the entire parameter list string.
 > The latter encode/decode will normally be carried out by HTTP libraries for you.
 
@@ -163,9 +163,9 @@ Assuming our example Track above is the only match, all three of these queries w
 
 ### Finding TAMS Source/Flow IDs from TADS Tracks
 
-TADS Tracks associated with TAMS content will include a [TAMS AppNote 0014](https://github.com/bbc/tams/blob/main/docs/appnotes/0014-referencing-tams-content-in-other-systems.md) compatible URI in their `timeline_reference.entity_id` attribute.
+TADS Tracks associated with TAMS content will include a [TAMS AppNote 0014](https://github.com/bbc/tams/blob/main/docs/appnotes/0014-referencing-tams-content-in-other-systems.md#uri-references) compatible URI in their `timeline_reference.entity_id` attribute.
 The use of TAMS for the [`timeline_reference.entity_id`](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks) may be identified by the use of the `tams://` "pseudo-protocol" at the start of the URI.
-Where the Timeline Reference Entity ID is a TAMS Source or Flow ID, the `tams://` pseudo-protocal may be replaced with `https://` to produce a valid URL referencing a TAMS Service Instance.
+Where the Timeline Reference Entity ID is a TAMS Source or Flow ID, the `tams://` pseudo-protocol may be replaced with `https://` to produce a valid URL referencing a TAMS Service Instance.
 Performing a GET request against it will return the Source/Flow metadata, with other TAMS endpoints such as [`flows/<flow_id>/segments`](https://bbc.github.io/tams/8.2/index.html#/operations/GET_flows-flowId-segments) being available on the same host.
 
 ## Potential Architectures
@@ -193,7 +193,7 @@ sequenceDiagram
 
 ### Event-driven Analysis of TAMS Media
 
-Where the Flow to be analysed is still being ingested, it may be more appropriate for the analysis process to register a webhook to recieve [`flows/segments_added` webhook events](https://bbc.github.io/tams/8.2/index.html#/webhooks/flows-segments_added/post) from TAMS as new Flow Segments become available.
+Where the Flow to be analysed is still being ingested, it may be more appropriate for the analysis process to register a webhook to receive [`flows/segments_added` webhook events](https://bbc.github.io/tams/8.2/index.html#/webhooks/flows-segments_added/post) from TAMS as new Flow Segments become available.
 As each Segment notification is received, its Media Object will be retrieved via one of the included `get_urls` and the media analysed.
 The timing information for resultant [Track Events](https://bbc.github.io/tads/0.1/index.html#/operations/POST_tracks-track_id-events) should be derived from the Segment metadata.
 The resulting Track Event(s) shall then be written to TADS.
@@ -281,7 +281,7 @@ sequenceDiagram
 
     loop For each Track Event
       TADS-->>Crop Process: POST Webhook Event - Track Event Added
-      Crop Process->>TAMS: GET Original Flow Segments corrosponding to Track Event
+      Crop Process->>TAMS: GET Original Flow Segments corresponding to Track Event
       TAMS-->>Crop Process: Original Flow Segments listing
       Crop Process->>Storage Backend: GET Original Media Object
       Storage Backend-->>Crop Process: Original Media Object
@@ -316,9 +316,9 @@ While TADS permits editing of Track Events, the same is not true of TAMS Segment
 Processes writing to TAMS may prefer or even require Tracks where `editable_events` is set to `false`.
 
 If such restrictions aren't possible, a system which generates TAMS Flow Segments from TADS Track Events as part of a batch process may accept this and process Tracks as if they were a snapshot in time when the process ran.
-Likewise, a webhook event-driven process may [subscribe](https://bbc.github.io/tads/0.1/index.html#/operations/PUT_service-webhooks-webhook_id) to [`tracks/events_added`](https://bbc.github.io/tads/0.1/index.html#/webhooks/tracks-events_added/post) but not [`tracks/events_updated`](https://bbc.github.io/tads/0.1/index.html#/webhooks/tracks-events_updated/post) or [`tracks/events_deleted`](https://bbc.github.io/tads/0.1/index.html#/webhooks/tracks-events_deleted/post).
+Likewise, a webhook event-driven process may [subscribe](https://bbc.github.io/tads/0.1/index.html#/operations/POST_service-webhooks-webhook_id) to [`tracks/events_added`](https://bbc.github.io/tads/0.1/index.html#/webhooks/tracks-events_added/post) but not [`tracks/events_updated`](https://bbc.github.io/tads/0.1/index.html#/webhooks/tracks-events_updated/post) or [`tracks/events_deleted`](https://bbc.github.io/tads/0.1/index.html#/webhooks/tracks-events_deleted/post).
 Again, this would result in the process acting on Track Events as they were when first created.
-Any Track Event updates would be ignored, which may result in divergance of the TADS Track and resultant TAMS Source.
+Any Track Event updates would be ignored, which may result in divergence of the TADS Track and resultant TAMS Source.
 As such, repeated runs of such a process may not output identical results.
 
 A workflow may create a second "snapshot" Track that is a non-editable copy of an editable Track to facilitate downstream workflows.
@@ -356,7 +356,7 @@ The following is an example workflow for creating a transcript in TADS of an Aud
 6. A user may then use a search Client to locate speech of interest
     1. Such a search Client may use a specialist Search Index to locate Track Events of interest
 7. The Client should verify that the [`timeline_reference.entity_id`](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks-track_id) URI is a TAMS URI (i.e. starts with `tams://`)
-8. The Source ID in the Track's `timeline_reference.entity_id` is used to identify the most appopriate Flow for retrieval of the media
+8. The Source ID in the Track's `timeline_reference.entity_id` is used to identify the most appropriate Flow for retrieval of the media
     1. This is done via [`GET https://tams.example.com/flows?source_id=<source_id>`](https://bbc.github.io/tams/8.2/index.html#/operations/GET_flows) with the corresponding Source ID
 9. The TimeRange of the Track Events of interest is then used to retrieve the corresponding Flow Segments
     1. This is done via [`GET https://tams.example.com/flows/<flow_id>/segments?timerange=<timerange>`](https://bbc.github.io/tams/8.2/index.html#/operations/GET_flows-flowId-segments) with the corresponding Flow ID and TimeRange

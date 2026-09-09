@@ -5,7 +5,7 @@
 [`timeline_selected`](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks-track_id) is intended to be used as an identifier for the specific timeline used for Track Event timings where the `entity_id` does not resolve to a single timeline.
 The values for this property are defined in this document.
 
-The recommendation is to use `timeline_reference.entitiy_id` values that do not require disambiguation through the `timeline_selected` property in the first place, however this may not be feasible for all workflows.
+The recommendation is to use [`timeline_reference.entitiy_id`](https://bbc.github.io/tads/0.1/index.html#/operations/GET_tracks-track_id) values that do not require disambiguation through the `timeline_selected` property in the first place, however this may not be feasible for all workflows.
 
 ## Context
 
