@@ -9,6 +9,8 @@ For more information on how we use application notes, see the AppNote [README](.
 | -------------------------------------------------------------------- | ------------------------------------------- |
 | [0001](./appnotes/0001-using-tads-with-tams.md)                      | Using TADS with TAMS                        |
 | [0002](./appnotes/0002-populating-the-timeline-selected-property.md) | Populating the `timeline_selected` property |
+| [0003](./appnotes/0003-using-tads-with-media-files.md)               | Using TADS with media files                 |
+
 
 ## ADRs
 
