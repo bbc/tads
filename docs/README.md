@@ -11,7 +11,6 @@ For more information on how we use application notes, see the AppNote [README](.
 | [0002](./appnotes/0002-populating-the-timeline-selected-property.md) | Populating the `timeline_selected` property |
 | [0003](./appnotes/0003-using-tads-with-media-files.md)               | Using TADS with media files                 |
 
-
 ## ADRs
 
 This repository uses [(M)ADR documents](https://adr.github.io/madr/) to propose significant changes, facilitate discussions and decision making, and to store a record of options that were considered.
