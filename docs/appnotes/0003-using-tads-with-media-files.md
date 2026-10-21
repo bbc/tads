@@ -14,7 +14,7 @@ The primary mechanism for associating TADS data with media content is through th
 In a straightforward scenario:
 
 * `timeline_reference.entity_id` points directly to a specific media file.
-  * For example, this could be a URL for where the file is stored, or an identifier of a specific item in an asset catalogue (following the catalogue guidance on referencing entities from external systems where possible).
+  * For example, this could be a URL for where the file is stored.
 * `timeline_reference.timeline_selected` is set to `urn:x-tads:timeline:playback` ,as per [AppNote0002](./0002-populating-the-timeline-selected-property.md), to signal that Track Event timings use the media file playback timeline (`0.0` seconds is at the beginning of media file playback).
 
 ### Track `edit_rate`
@@ -60,7 +60,11 @@ Do get in touch to discuss potential improvements or clarifications based on the
 ### Track `timeline_reference`
 
 `timeline_reference.entity_id` is not required to reference a specific media file.
-For example, it could identify a higher-level asset which has a main (high quality) version and 'proxies' that all share the same timeline.
+
+* This could also be an identifier of a specific item in an asset catalogue (following the catalogue guidance on referencing entities from external systems where possible).
+* Where `entity_id` is not a directly accessible link to a file, it should embed some signalling of the protocol (or system) used to access the media.
+
+For example, `entity_id` could identify a higher-level asset which has a main (high quality) version and 'proxies' that all share the same timeline.
 In this scenario, it is more practical for `entity_id` to reference the higher-level asset rather than creating a Track for each of the specific media files (all of these Tracks would have the same Track Events).
 This approach mitigates potential issues related to file lifecycle management, file discovery, reference resolution or 'proxy' handling.
 
