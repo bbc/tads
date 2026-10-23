@@ -15,7 +15,7 @@ In a straightforward scenario:
 
 * `timeline_reference.entity_id` points directly to a specific media file.
   * For example, this could be a URL for where the file is stored.
-* `timeline_reference.timeline_selected` is set to `urn:x-tads:timeline:playback` ,as per [AppNote0002](./0002-populating-the-timeline-selected-property.md), to signal that Track Event timings use the media file playback timeline (`0.0` seconds is at the beginning of media file playback).
+* `timeline_reference.timeline_selected` is set to `urn:x-tads:timeline:playback` (per [AppNote 0002](./0002-populating-the-timeline-selected-property.md)) to signal that Track Event timings use the media file playback timeline (`0.0` seconds is at the beginning of media file playback).
 
 ### Track `edit_rate`
 
