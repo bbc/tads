@@ -77,7 +77,7 @@
             "default": false
         },
         "allow_overlaps": {
-            "description": "If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'true' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.",
+            "description": "If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'false' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.",
             "type": "boolean",
             "default": true
         },
