@@ -1602,7 +1602,7 @@ paths:
             application/json:
               example: true
               schema:
-                description: If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'true' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.
+                description: If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'false' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.
                 type: boolean
                 default: true
         "404":
@@ -1623,7 +1623,7 @@ paths:
           application/json:
             example: true
             schema:
-              description: If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'true' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.
+              description: If set to 'false', Service Implementations MUST reject client requests to create overlapping Track Events within the Track. This includes modifying existing Track Events such that they overlap. A request to change this value to 'false' MUST be rejected with a `400` error if overlapping Track Events already exist in the Track.
               type: boolean
               default: true
         required: true
@@ -1631,7 +1631,7 @@ paths:
         "204":
           description: No content. The Track `allow_overlaps` has been set with the given value.
         "400":
-          description: Bad request. Invalid Track `allow_overlaps` value. If setting `allow_overlaps` to true, this will only be permitted if the Track does not own any Track Events with overlapping `timerange` values.
+          description: Bad request. Invalid Track `allow_overlaps` value. If setting `allow_overlaps` to false, this will only be permitted if the Track does not own any Track Events with overlapping `timerange` values.
         "403":
           description: Forbidden. You do not have permission to modify the `allow_overlaps` property. The Track could be marked read-only.
         "404":
